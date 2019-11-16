@@ -20,6 +20,7 @@ public class Analyzer {
 
     private void analyze (){
         System.out.println("Analyzing");
+        Writer.writer.println("TEST");
     }
 
     public static void makeAnalyzer(String filename){

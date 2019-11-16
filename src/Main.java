@@ -1,7 +1,12 @@
 public class Main {
     public static void main(String[] args) {
-        System.out.println("In Main");
+        Writer.setWriter("output.txt");
+
+        // Analyze and inject logs to obtain dynamic properties
         Analyzer.makeAnalyzer("README.md");
+
+        Writer.closeWriter();
+
     }
 
 }
