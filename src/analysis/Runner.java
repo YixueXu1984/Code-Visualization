@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Stack;
 
+
+//TODO, injected files should have the log package import, but compiler may
+//TODO have trouble finding it, if so, add a copy of the file to injected.
 /*
 This class takes input files, calls the injection methods, then runs the injected code
 Setup:
@@ -87,6 +90,7 @@ public class Runner {
         }
     }
 
+    //Note:The inject method call should put the injected file into the proper directory.
     private static void inject() {
         projectStack.push(new File("in"));
         File file = null;
