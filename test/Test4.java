@@ -1,6 +1,6 @@
 // Branched Tree With Loop Back
 
-public class Test4 {
+class Test4 {
 
     private static void first(int selfCall) {
 

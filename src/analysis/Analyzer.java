@@ -1,7 +1,6 @@
 package analysis;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,8 +21,13 @@ public class Analyzer {
     }
 
     private void analyze (){
-        System.out.println("Analyzing");
-        //Writer.writer.println("TEST");
+        System.out.println("Analyzing ...");
+
+        String injectedProgram = program;
+
+        injectedProgram = injectedProgram.replaceAll("((?:(?:public|private|protected|static|final|native|synchronized|abstract|transient)+\\s+)+[$_\\w<>\\[\\]\\s]*\\s+[\\$_\\w]+\\([^\\)]*\\)?\\s*\\{)","$1 \n Logger.log(); \n");
+
+        Writer.writer.println(injectedProgram);
     }
 
     public static void makeAnalyzer(String filename){

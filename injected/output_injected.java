@@ -2,7 +2,9 @@
 
 class Test1 {
 
-    private static void first(int selfCall) {
+    private static void first(int selfCall) { 
+ Logger.log(); 
+
 
         if(selfCall > 0) {
 
@@ -14,7 +16,9 @@ class Test1 {
         }
     }
 
-    private static void second(int selfCall) {
+    private static void second(int selfCall) { 
+ Logger.log(); 
+
 
         if(selfCall > 0) {
 
@@ -26,7 +30,9 @@ class Test1 {
         }
     }
 
-    private static void third(int selfCall) {
+    private static void third(int selfCall) { 
+ Logger.log(); 
+
 
         if(selfCall > 0) {
 
@@ -38,7 +44,9 @@ class Test1 {
         }
     }
 
-    private static void fourth(int selfCall) {
+    private static void fourth(int selfCall) { 
+ Logger.log(); 
+
 
         if(selfCall > 0) {
 
@@ -47,9 +55,12 @@ class Test1 {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) { 
+ Logger.log(); 
+
 
         System.out.println("In Main!");
         first(4);
     }
 }
+

@@ -25,18 +25,15 @@ public class Runner {
         inject();
         //compile and run injected code
         File file;
-        projectStack.push(new File("out/injected"));
+        projectStack.push(new File("injected"));
         Process p;
-        String mainClass, mainPath;
-        String[] temp = null;
+        String mainPath, compileStr = "";
         Runtime rt = Runtime.getRuntime();
         //find out main path from mainFile.txt
         try {
-            BufferedReader r = new BufferedReader(new FileReader("out/mainFile.txt"));
+            BufferedReader r = new BufferedReader(new FileReader("in/mainFile.txt"));
             mainPath = r.readLine();
-            temp = mainPath.split("/");
-            mainClass = temp[temp.length-1];
-            mainPath = mainPath.substring(mainPath.length()-mainClass.length()-1);
+            mainPath = mainPath.substring(0, mainPath.length() - 5).replace("/",".");
             r.close();
         } catch (IOException e) {
             System.out.println("Failed to read main file path");
@@ -44,13 +41,17 @@ public class Runner {
         }
         try {
             //compile all files
-            do{
+            file = getNext();
+            while(file != null) {
+                compileStr += " " + file.getPath();
                 file = getNext();
-                p = rt.exec("javac out/injected/" + file.getPath());
-                p.waitFor();
-            } while(file != null);
+            }
+            System.out.println("javac" + compileStr);
+            p = rt.exec("javac" + compileStr);
+            p.waitFor();
             //run main file
-            p = rt.exec("java -cp out/injected/" + mainPath + " " + mainClass);
+            System.out.println("java -cp injected " + mainPath);
+            p = rt.exec("java -cp injected " + mainPath);
             p.waitFor();
         } catch (Exception e) {
             System.out.println("Failed to compile or run one or more injected files");
@@ -67,7 +68,7 @@ public class Runner {
         File f;
         String s;
         int i;
-        if(dirContents != null & dirContents.hasNext()) {
+        if(dirContents != null && dirContents.hasNext()) {
             f = dirContents.next();
             if (f.isFile()) {
                 s = f.getName();
