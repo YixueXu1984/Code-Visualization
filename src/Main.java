@@ -33,15 +33,13 @@ public class Main {
         Writer.setWriter("output.txt");
 
         // Analyze and inject logs to obtain dynamic properties
-        Analyzer.makeAnalyzer("README.md");
-
+        Analyzer.makeAnalyzer("test/Test1.java");
         Writer.closeWriter();
-
-        // TODO: Refactor (or use existing writer class)
 
         System.out.println("Getting Runtime");
         Runtime rt = Runtime.getRuntime();
-        System.out.println("Writing Child program");
+
+        // Run injected file
         try {
             String program =
                     "import java.io.BufferedWriter;\n" +
