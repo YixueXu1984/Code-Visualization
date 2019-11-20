@@ -1,7 +1,5 @@
 package analysis;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,10 +7,6 @@ import java.io.IOException;
 import java.lang.Runtime;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Stack;
-import java.util.regex.Pattern;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
@@ -138,11 +132,10 @@ public class Runner {
 
     private static void copyLogger() {
         try {
-            Files.copy((new File("src/viz/Logger.java")).toPath(),
-                    (new File("inject/Logger.java")).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+            Writer.setWriter("inject/Logger.java");
+            Analyzer.packageLogger("src/viz/Logger.java");
             addFileToCompile("inject/Logger.java");
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Failed to copy over Logger.java");
             System.exit(0);
         }

@@ -33,8 +33,12 @@ public class Logger {
 
     }
 
+    public static void log() {
+
+    }
+
     public static void writeLogs() {
-        GraphMaker.visualize(callFreqs, funcTimes);
+        //GraphMaker.visualize(callFreqs, funcTimes);
     }
 
 }
