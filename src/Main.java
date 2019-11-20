@@ -1,12 +1,35 @@
-import analysis.Analyzer;
-
-import java.io.FileWriter;
-import java.lang.Runtime;
-import java.io.BufferedWriter;
+import analysis.Runner;
 
 public class Main {
 
+
     public static void main(String[] args) {
+        Runner.run();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*public static void main(String[] args) {
         Writer.setWriter("output.txt");
 
         // Analyze and inject logs to obtain dynamic properties
@@ -49,5 +72,5 @@ public class Main {
         } catch (Exception e) {
             System.out.println("Caught an exception while trying to run child");
         }
-    }
+    }*/
 }
