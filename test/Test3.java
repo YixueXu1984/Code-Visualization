@@ -1,6 +1,6 @@
 // Circular Graph
 
-public class Test3 {
+class Test3 {
 
     private static void first(int selfCall) {
 

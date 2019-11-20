@@ -1,5 +1,5 @@
 // Mutual Recursion
-public class Test5 {
+class Test5 {
 
     private static void first(int selfCall) {
 
