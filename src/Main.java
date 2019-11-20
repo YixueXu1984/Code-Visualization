@@ -1,3 +1,5 @@
+import analysis.Analyzer;
+
 import java.io.FileWriter;
 import java.lang.Runtime;
 import java.io.BufferedWriter;
