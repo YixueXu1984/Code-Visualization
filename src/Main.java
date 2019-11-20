@@ -12,14 +12,12 @@ public class Main {
 
         // Analyze and inject logs to obtain dynamic properties
         Analyzer.makeAnalyzer("test/Test1.java");
-
         Writer.closeWriter();
-
-        // TODO: Refactor (or use existing writer class)
 
         System.out.println("Getting Runtime");
         Runtime rt = Runtime.getRuntime();
 
+        // Run injected file
         try {
             Process p = rt.exec("javac injected/output_injected.java injected/Logger.java");
             p.waitFor();
