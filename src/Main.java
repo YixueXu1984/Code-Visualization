@@ -21,7 +21,7 @@ public class Main {
         Runtime rt = Runtime.getRuntime();
 
         try {
-            Process p = rt.exec("javac injected/output_injected.java");
+            Process p = rt.exec("javac injected/output_injected.java injected/Logger.java");
             p.waitFor();
             p = rt.exec("java -cp injected Test1");
             p.waitFor();
