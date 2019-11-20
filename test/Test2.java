@@ -1,6 +1,6 @@
 // Branched Tree
 
-public class Test2 {
+class Test2 {
 
     private static void first(int selfCall) {
 
