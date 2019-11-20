@@ -10,6 +10,9 @@ public class Writer {
 
     public static void setWriter(String name) {
         try {
+            if(writer != null) {
+                writer.close();
+            }
             writer = new PrintWriter(name, "UTF-8");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             System.out.println("Didn't find file to write to");

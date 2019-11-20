@@ -1,17 +1,25 @@
 package analysis;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.Runtime;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Stack;
+import java.util.regex.Pattern;
+
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.FileVisitResult.TERMINATE;
 
 
-//TODO, injected files should have the log package import, but compiler may
-//TODO have trouble finding it, if so, add a copy of the file to injected.
+//TODO logger import stms / pakcage decl
+
 /*
 This class takes input files, calls the injection methods, then runs the injected code
 Setup:
@@ -20,14 +28,17 @@ the runtime entry point path into cpsc410-viz/in/mainFile.txt
  */
 public class Runner {
 
+    private static String compileStr;
+
     public static void run() {
         //inject everything
         inject();
+        copyLogger();
         //compile and run injected code
         File file;
-        projectStack.push(new File("injected"));
         Process p;
-        String mainPath, compileStr = "";
+        String mainPath = "";
+        Runner.compileStr = "";
         Runtime rt = Runtime.getRuntime();
         //find out main path from mainFile.txt
         try {
@@ -37,69 +48,142 @@ public class Runner {
             r.close();
         } catch (IOException e) {
             System.out.println("Failed to read main file path");
-            throw new RuntimeException(); //mainFile should exist and hav path in it.
+            System.exit(0);
         }
         try {
             //compile all files
-            file = getNext();
-            while(file != null) {
-                compileStr += " " + file.getPath();
-                file = getNext();
-            }
+            file = new File("inject");
+            Files.walkFileTree(file.toPath(), new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Runner.addFileToCompile(file.toString());
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    return TERMINATE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    return CONTINUE;
+                }
+            });
             System.out.println("javac" + compileStr);
             p = rt.exec("javac" + compileStr);
             p.waitFor();
             //run main file
-            System.out.println("java -cp injected " + mainPath);
-            p = rt.exec("java -cp injected " + mainPath);
+            System.out.println("java -cp inject " + mainPath);
+            p = rt.exec("java -cp inject " + mainPath);
             p.waitFor();
         } catch (Exception e) {
             System.out.println("Failed to compile or run one or more injected files");
-            throw new RuntimeException(); //code should compile
-        }
-    }
-
-    private static Stack<File> projectStack = new Stack<>();
-    private static Iterator<File> dirContents;
-
-    //iterator method recurses through code directory
-    private static File getNext() {
-        //return next .java file to compile
-        File f;
-        String s;
-        int i;
-        if(dirContents != null && dirContents.hasNext()) {
-            f = dirContents.next();
-            if (f.isFile()) {
-                s = f.getName();
-                i = s.lastIndexOf(".");
-                if (i>0 && s.substring(1 +i).equals("java"))
-                    return f;
-                else
-                    return getNext();
-            } else if (f.isDirectory()){
-                projectStack.push(f);
-                return getNext();
-            }
-            return getNext();
-        } else {
-            if(projectStack.size() > 0) {
-                dirContents = Arrays.asList(projectStack.pop().listFiles()).iterator();
-                return getNext();
-            } else
-                return null;
+            cleanInjected();
+            System.exit(0);
         }
     }
 
     //Note:The inject method call should put the injected file into the proper directory.
     private static void inject() {
-        projectStack.push(new File("in"));
-        File file = null;
-        file = getNext();
-        while (file != null) {
-            file = getNext();
-            Analyzer.makeAnalyzer(file.getName());
+        File file;
+        try {
+            file = new File("in");
+            Files.walkFileTree(file.toPath(), new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    File myFile;
+                    if(dir.toString().equals("in"))
+                        myFile = new File("inject");
+                    else
+                        myFile = new File("inject/" + dir.toString().substring(3));
+                    myFile.mkdirs();
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    File myFile;
+                    String name = file.getFileName().toString();
+                    if(name.substring(name.lastIndexOf(".")).equals(".java")) {
+                        name = "inject/" + file.toString().substring(3);
+                        myFile = new File( name);
+                        myFile.createNewFile();
+                        System.out.println("To " + name + " from " + file.toString());
+                        Writer.setWriter(name);
+                        Analyzer.analyze(file.toString());
+                    }
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    return TERMINATE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    return CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            cleanInjected();
         }
+    }
+
+    private static void copyLogger() {
+        try {
+            Files.copy((new File("src/viz/Logger.java")).toPath(),
+                    (new File("inject/Logger.java")).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            addFileToCompile("inject/Logger.java");
+        } catch (IOException e) {
+            System.out.println("Failed to copy over Logger.java");
+            System.exit(0);
+        }
+    }
+
+    private static void cleanInjected() {
+        try {
+            File file = new File("injected");
+            System.out.println("Failed to create injected files");
+            Files.walkFileTree(file.toPath(), new FileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.deleteIfExists(file);
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.deleteIfExists(dir);
+                    return CONTINUE;
+                }
+            });
+            Files.createFile(file.toPath());
+            System.exit(0);
+        } catch (IOException e) {
+            System.exit(0);
+        }
+    }
+
+    public static void addFileToCompile(String s) {
+        compileStr += " " + s;
     }
 
 }
