@@ -1,0 +1,14 @@
+This is the overall flow for our viz:
+
+-User places a java project into the /in directory
+-User specifies main file path in /in/mainFile.txt
+
+-Run cpsc410-viz
+    -Runner.run()
+        -calls inject()
+            -injects logging code into all .java files inside /in
+            -places these into /out/injected
+        -compiles all /out/injected .java files
+        -runs injected version, injected lines record data
+            -data written to /out/analyzed
+    -graphViz is run on /out/analyzed function

@@ -94,10 +94,11 @@ public class Runner {
     private static void inject() {
         projectStack.push(new File("in"));
         File file = null;
-        do {
+        file = getNext();
+        while (file != null) {
             file = getNext();
-            //call injector;
-        } while (file != null);
+            Analyzer.makeAnalyzer(file.getName());
+        }
     }
 
 }
